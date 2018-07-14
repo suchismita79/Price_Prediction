@@ -1,0 +1,188 @@
+
+import keras
+import tensorflow as tf
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import cross_val_score
+from keras.wrappers.scikit_learn import KerasRegressor
+import os
+import keras
+from keras.models import Sequential
+from keras.layers import Dense, Activation
+import time
+from datetime import timedelta
+start_time = time.monotonic()
+
+path1="FILEPATH_FOR_SELF/Data/Sberbank_Russian_Housing_Market/Train/"
+path2="FILEPATH_FOR_SELF/Data/Sberbank_Russian_Housing_Market/Test/"
+
+res_DL= []
+
+seed =7
+np.random.seed(seed)
+
+############################################
+def reg_model():
+    # Initialising the ANN
+    model = Sequential()
+# for automatically capturing the column counts
+    var = train_x.shape[1]
+ 
+# Adding the input layer and the first hidden layer
+    model.add(Dense(output_dim = var, activation = 'relu', input_dim = var, kernel_initializer='normal'))
+# Adding the second hidden layer
+    model.add(Dense(output_dim = int(var*0.8), activation = 'relu'))
+    model.add(Dense(output_dim = int(var*0.6), activation = 'relu'))
+    model.add(Dense(output_dim = int(var*0.4), activation = 'relu'))
+    model.add(Dense(output_dim = int(var*0.2), activation = 'relu'))
+    model.add(Dense(output_dim = int(var*0.1), activation = 'relu'))
+
+# Adding the output layer
+    model.add(Dense(output_dim = 1, kernel_initializer='normal'))
+# Compiling the ANN
+    model.compile(optimizer = 'adam', loss = 'mean_squared_error')
+    return model
+
+######################################################
+x= os.listdir(path1)
+y= os.listdir(path2)
+
+# Declaring empty train and test list
+train_list=[]
+test_list=[]
+
+# Creating separate list for train and test sets
+for i,file in enumerate(x):
+    train_list.append(file)
+        
+for i,file in enumerate(y):
+    test_list.append(file)
+
+for i in range(len(train_list)):
+    dataset = pd.read_csv(path1+train_list[i])
+    dataset1=pd.read_csv(path2+test_list[i])
+    print ("Processed Train and Test Set"+str(i+1))
+
+#############  House Price ###################################    
+#    dataset = dataset.drop(dataset.columns[0:2],axis =1)
+#    dataset1 = dataset1.drop(dataset1.columns[0:2],axis =1)
+#    
+#    dataset['Diff_Year']=dataset['YearRemodAdd'] - dataset['YearBuilt']
+#    dataset1['Diff_Year']=dataset1['YearRemodAdd'] - dataset1['YearBuilt']
+#    
+#    train_data= dataset.drop(['YearBuilt','YearRemodAdd','YrSold'],axis=1)
+#    test_data= dataset.drop(['YearBuilt','YearRemodAdd','YrSold'],axis=1)
+#    
+#    train_x=train_data.drop('SalePrice',1)
+#    train_y=train_data.loc[:,'SalePrice']
+#                    
+#    test_x=test_data.drop('SalePrice',1)
+#    test_y=test_data.loc[:,'SalePrice']
+########################   End of House Price ##########################   
+    
+    
+#    dataset = dataset.drop(['Unnamed: 0','id','sub_area','culture_objects_top_25'], axis=1)
+#    dataset1 = dataset1.drop(['Unnamed: 0','year','week_start_date'],axis =1)
+
+
+#    train_data= dataset.replace("LF","Low Fat")
+#    train_data= dataset.replace('reg','Regular')
+#    test_data=dataset1.replace("LF","Low Fat")
+#    test_data=dataset1.replace('reg','Regular')
+#    train_data=dataset.dropna()
+#    test_data =dataset1.dropna()
+#    train_data = pd.get_dummies(train_data, columns=['Type'], drop_first = True)
+#    test_data = pd.get_dummies(test_data, columns=['Type'], drop_first = True)
+#    
+#    train_x=train_data.drop('Total.Interactions',1)
+#    train_y=train_data.loc[:,'Total.Interactions']
+#                    
+#    test_x=test_data.drop('Total.Interactions',1)
+#    test_y=test_data.loc[:,'Total.Interactions']
+    
+
+#    train_data= dataset.replace('?',0)
+#    test_data=dataset1.replace('?',0)
+##########################################################################    
+#    train_data = dataset.drop(dataset.columns[0],axis = 1)
+#
+#    test_data = dataset1.drop (dataset1.columns[0], axis =1)
+#    
+#    train_x=train_data.iloc[:,:-1].values
+#    train_y=train_data.iloc[:,-1].values
+#                    
+#    test_x=test_data.iloc[:,:-1].values
+#    test_y=test_data.iloc[:,-1].values
+###########################################################################    
+# encoding of categorical data for Insurance dataset
+
+#    from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+#    labelencoder_X = LabelEncoder()
+#    train_x[:,0]= labelencoder_X.fit_transform(train_x[:,0])
+#    train_x[:,4]= labelencoder_X.fit_transform(train_x[:,4])
+#    train_x[:,5]= labelencoder_X.fit_transform(train_x[:,5])
+#    onehotencoder_X = OneHotEncoder(categorical_features = [5])
+#    train_x = onehotencoder_X.fit_transform(train_x).toarray()
+#    train_x= train_x[:,1:]
+#    
+#    labelencoder_Y = LabelEncoder()
+#    test_x[:, 0] = labelencoder_Y.fit_transform(test_x[:, 0])
+##    test_x[:, 4] = labelencoder_Y.fit_transform(test_x[:, 4])
+#    test_x[:, 5] = labelencoder_Y.fit_transform(test_x[:, 5])
+#    onehotencoder_Y =OneHotEncoder(categorical_features = [5])
+#    test_x = onehotencoder_Y.fit_transform(test_x).toarray()
+#    test_x=test_x[:,1:]
+
+
+###############   SyberBank Data ###############################
+    dataset = dataset.drop(['Unnamed: 0','id','sub_area','culture_objects_top_25'], axis=1)
+    dataset1 = dataset1.drop(['Unnamed: 0','id','sub_area','culture_objects_top_25'],axis =1)
+    
+    dataset = dataset.drop(dataset.columns[130:148], axis=1)
+    dataset1 = dataset1.drop(dataset1.columns[130:148], axis=1)
+    
+    train_data=dataset.dropna()
+    test_data =dataset1.dropna()
+        
+    train_data = pd.get_dummies(train_data, columns=None, drop_first = True)
+    test_data = pd.get_dummies(test_data, columns=None, drop_first = True)
+
+    train_x=train_data.drop('price_doc',1)
+    train_y=train_data.loc[:,'price_doc']
+                    
+    test_x=test_data.drop('price_doc',1)
+    test_y=test_data.loc[:,'price_doc']
+
+
+# Feature Scaling
+    from sklearn.preprocessing import StandardScaler
+    sc = StandardScaler()
+    train_x = sc.fit_transform(train_x)
+    test_x = sc.transform(test_x)
+
+
+############################################# 
+
+    estimator = KerasRegressor(build_fn=reg_model, epochs=150, batch_size=10, verbose=0)
+    estimator.fit(train_x, train_y)
+    
+y_pred = estimator.predict(test_x)
+    
+from math import sqrt
+import sklearn.metrics
+from sklearn.metrics import mean_squared_error
+MSE= mean_squared_error(test_y,y_pred)
+#    with open("House_price_Results.csv",'a') as wa:
+#        result=str([test_y,y_pred])
+#        wa.write(result)
+#print (str(test_y), str(y_pred))
+RMSE= sqrt(MSE)
+res_DL.append(RMSE)
+
+end_time = time.monotonic()
+    
+print("RMSE::",np.mean(res_DL),"Std Dev",np.std(res_DL))
+
+print()
+
+print("Total time: {}".format(timedelta(seconds=end_time - start_time))) 
